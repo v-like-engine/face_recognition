@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  face-recognition-api:
+    build: .
+    container_name: face_recognition_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./known_faces:/app/known_faces
+    environment:
+      - DEBUG=false
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
