@@ -1,14 +1,39 @@
 # Face Recognition API
 
-A powerful and easy-to-use face recognition REST API built with Python, FastAPI, and the `face_recognition` library. This tool provides face detection, recognition, and management capabilities with a clean API interface.
+A powerful and easy-to-use face recognition REST API built with Python, FastAPI, and the `face_recognition` library. This tool provides face detection, recognition, and management capabilities with a clean API interface, plus a real-time camera testing stand!
+
+## 🚀 Quick Start
+
+```bash
+# Linux/macOS
+./start.sh
+
+# Windows
+start.bat
+```
+
+Then open: **http://localhost:8000/testing-stand**
+
+For detailed instructions, see [QUICK_START.md](QUICK_START.md)
 
 ## Features
 
+### Core Features
 - **Face Detection** - Detect and locate faces in images
 - **Face Recognition** - Identify known faces in images
 - **Face Management** - Add, remove, and list known faces
 - **Facial Landmarks** - Extract detailed facial features (eyes, nose, mouth, etc.)
+
+### Real-Time Features (NEW!)
+- **🎥 Live Camera Interface** - Web-based testing stand with real-time recognition
+- **📊 Unique Face Tracking** - Automatically logs each unique person detected
+- **📝 Session Logging** - Detailed logs with timestamps and confidence scores
+- **📈 Statistics Dashboard** - Real-time counts and encounter tracking
+- **💾 Export Logs** - Download session data as JSON
+
+### API Features
 - **RESTful API** - Easy integration with any application
+- **WebSocket Support** - Real-time video streaming
 - **Interactive Documentation** - Auto-generated API docs with Swagger UI
 - **Docker Support** - Easy deployment with Docker and Docker Compose
 - **Configurable** - Adjustable tolerance, detection models, and more
@@ -24,7 +49,26 @@ A powerful and easy-to-use face recognition REST API built with Python, FastAPI,
 
 ## Installation
 
-### Option 1: Local Installation
+### Quick Install (Recommended)
+
+**Linux/macOS:**
+```bash
+./start.sh
+```
+
+**Windows:**
+```cmd
+start.bat
+```
+
+The script automatically:
+- Creates virtual environment
+- Installs all dependencies
+- Creates necessary directories
+- Tests camera availability
+- Starts the server
+
+### Manual Installation
 
 1. **Clone the repository**
    ```bash
@@ -43,7 +87,12 @@ A powerful and easy-to-use face recognition REST API built with Python, FastAPI,
    pip install -r requirements.txt
    ```
 
-4. **Configure the application** (optional)
+4. **Create directories**
+   ```bash
+   mkdir -p uploads known_faces logs
+   ```
+
+5. **Configure the application** (optional)
    ```bash
    cp .env.example .env
    # Edit .env with your preferred settings
@@ -72,12 +121,85 @@ A powerful and easy-to-use face recognition REST API built with Python, FastAPI,
    docker run -p 8000:8000 -v $(pwd)/uploads:/app/uploads -v $(pwd)/known_faces:/app/known_faces face-recognition-api
    ```
 
-## API Documentation
+## Access Points
 
-Once the server is running, access the interactive API documentation at:
+Once the server is running:
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **🎥 Testing Stand (Camera)**: http://localhost:8000/testing-stand
+- **📚 API Documentation (Swagger)**: http://localhost:8000/docs
+- **📖 Alternative Docs (ReDoc)**: http://localhost:8000/redoc
+- **💚 Health Check**: http://localhost:8000/api/v1/health
+
+## Testing Stand (Real-Time Camera Interface)
+
+### Overview
+
+The Testing Stand provides a beautiful web interface for real-time face recognition:
+
+![Testing Stand Interface]
+
+### Features
+
+- **Live Video Feed**: Real-time camera stream with face detection boxes
+- **Automatic Recognition**: Identifies known faces instantly
+- **Unique Face Logging**: Tracks each unique person detected
+- **Session Statistics**: Shows unique faces and total detections
+- **Detection Log**: Real-time console with timestamps
+- **Export Functionality**: Download session logs as JSON
+
+### Usage
+
+1. **Start the server**:
+   ```bash
+   ./start.sh  # or python main.py
+   ```
+
+2. **Add known faces** (before starting camera):
+   ```bash
+   python scripts/add_face.py photo.jpg "John Doe"
+   ```
+
+3. **Open Testing Stand**:
+   ```
+   http://localhost:8000/testing-stand
+   ```
+
+4. **Click "▶ Start Camera"** and allow camera access
+
+5. **Watch the magic happen!** As people appear:
+   - Green boxes appear around known faces
+   - Red boxes appear around unknown faces
+   - Names and confidence scores are displayed
+   - Statistics update in real-time
+   - Unique faces are logged to console
+
+6. **Export results**: Click "📥 Export Log" to download session data
+
+### Log Output
+
+When a new face is detected, the server console shows:
+
+```
+[NEW FACE DETECTED] John Doe at 2025-01-18T14:31:05.123456 (confidence: 0.87)
+```
+
+When you stop the camera, a session summary is printed:
+
+```
+============================================================
+SESSION SUMMARY
+============================================================
+Unique faces detected: 3
+Faces: Alice Johnson, Bob Smith, John Doe
+
+Encounter counts:
+  - John Doe: 45 times
+  - Alice Johnson: 23 times
+  - Bob Smith: 12 times
+
+Log file: logs/session_20250118_143052.json
+============================================================
+```
 
 ## API Endpoints
 

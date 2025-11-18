@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Testing Stand</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .video-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #videoFeed {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-badge.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-badge.inactive {
+            background: #ef4444;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-card .label {
+            color: #6b7280;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .face-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .face-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+        }
+
+        .face-item .name {
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .face-item .count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .log-section {
+            background: #1f2937;
+            color: #f9fafb;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #9ca3af;
+        }
+
+        .log-name {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .log-confidence {
+            color: #60a5fa;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .no-camera {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .no-camera i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Face Recognition Testing Stand</h1>
+            <p>Real-time Face Detection and Recognition</p>
+        </div>
+
+        <div class="content">
+            <div class="video-section">
+                <div class="video-container">
+                    <span class="status-badge inactive" id="statusBadge">INACTIVE</span>
+                    <img id="videoFeed" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect fill='%23000' width='800' height='600'/%3E%3Ctext fill='%23666' font-family='Arial' font-size='24' x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle'%3EClick START CAMERA to begin%3C/text%3E%3C/svg%3E" alt="Video Feed">
+                </div>
+
+                <div class="controls">
+                    <button class="btn-primary" onclick="startCamera()">▶ Start Camera</button>
+                    <button class="btn-danger" onclick="stopCamera()">⏹ Stop Camera</button>
+                    <button class="btn-secondary" onclick="newSession()">🔄 New Session</button>
+                    <button class="btn-secondary" onclick="exportLog()">📥 Export Log</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="panel">
+                    <h2>📊 Session Statistics</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="value" id="uniqueCount">0</div>
+                            <div class="label">Unique Faces</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="totalCount">0</div>
+                            <div class="label">Total Detections</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin: 20px 0 10px 0; color: #1f2937;">Identified People</h3>
+                    <div class="face-list" id="faceList">
+                        <p style="text-align: center; color: #9ca3af; padding: 20px;">No faces detected yet</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>📝 Detection Log</h2>
+                    <div class="log-section" id="logSection">
+                        <div class="log-entry">System ready. Start camera to begin detection.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let isRunning = false;
+        const API_BASE = window.location.origin;
+        const WS_BASE = API_BASE.replace('http', 'ws');
+
+        function addLog(message, isError = false) {
+            const logSection = document.getElementById('logSection');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+            if (isError) entry.style.color = '#ef4444';
+            logSection.appendChild(entry);
+            logSection.scrollTop = logSection.scrollHeight;
+        }
+
+        async function startCamera() {
+            if (isRunning) {
+                addLog('Camera is already running', true);
+                return;
+            }
+
+            try {
+                addLog('Starting camera...');
+
+                // Connect WebSocket
+                ws = new WebSocket(`${WS_BASE}/api/v1/ws/camera`);
+
+                ws.onopen = () => {
+                    isRunning = true;
+                    document.getElementById('statusBadge').textContent = 'ACTIVE';
+                    document.getElementById('statusBadge').className = 'status-badge active';
+                    addLog('✓ Camera started successfully');
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'frame') {
+                        // Update video feed
+                        document.getElementById('videoFeed').src = `data:image/jpeg;base64,${data.frame}`;
+
+                        // Log detected faces
+                        if (data.faces && data.faces.length > 0) {
+                            data.faces.forEach(face => {
+                                if (face.name !== 'Unknown') {
+                                    const logMsg = `Detected: <span class="log-name">${face.name}</span> <span class="log-confidence">(${(face.confidence * 100).toFixed(1)}%)</span>`;
+                                    // Only log occasionally to avoid spam
+                                    if (Math.random() < 0.1) {
+                                        addLog(logMsg);
+                                    }
+                                }
+                            });
+                        }
+
+                        // Update summary
+                        if (data.summary) {
+                            updateSummary(data.summary);
+                        }
+                    } else if (data.type === 'error') {
+                        addLog(`Error: ${data.message}`, true);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    addLog('WebSocket error occurred', true);
+                    console.error('WebSocket error:', error);
+                };
+
+                ws.onclose = () => {
+                    isRunning = false;
+                    document.getElementById('statusBadge').textContent = 'INACTIVE';
+                    document.getElementById('statusBadge').className = 'status-badge inactive';
+                    addLog('Camera stopped');
+                };
+
+            } catch (error) {
+                addLog(`Failed to start camera: ${error.message}`, true);
+            }
+        }
+
+        function stopCamera() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            isRunning = false;
+            addLog('Stopping camera...');
+        }
+
+        async function newSession() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/camera/new-session`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (data.success) {
+                    addLog('✓ New session started');
+                    // Reset display
+                    document.getElementById('uniqueCount').textContent = '0';
+                    document.getElementById('totalCount').textContent = '0';
+                    document.getElementById('faceList').innerHTML = '<p style="text-align: center; color: #9ca3af; padding: 20px;">No faces detected yet</p>';
+                }
+            } catch (error) {
+                addLog(`Failed to start new session: ${error.message}`, true);
+            }
+        }
+
+        async function exportLog() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/camera/summary`);
+                const data = await response.json();
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `face_recognition_log_${new Date().toISOString()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                addLog('✓ Log exported successfully');
+            } catch (error) {
+                addLog(`Failed to export log: ${error.message}`, true);
+            }
+        }
+
+        function updateSummary(summary) {
+            // Update stats
+            document.getElementById('uniqueCount').textContent = summary.unique_faces_count || 0;
+
+            const totalDetections = Object.values(summary.encounters || {}).reduce((a, b) => a + b, 0);
+            document.getElementById('totalCount').textContent = totalDetections;
+
+            // Update face list
+            const faceList = document.getElementById('faceList');
+            if (summary.unique_faces && summary.unique_faces.length > 0) {
+                faceList.innerHTML = '';
+                summary.unique_faces.forEach(name => {
+                    const count = summary.encounters[name] || 0;
+                    const item = document.createElement('div');
+                    item.className = 'face-item';
+                    item.innerHTML = `
+                        <span class="name">${name}</span>
+                        <span class="count">${count}x</span>
+                    `;
+                    faceList.appendChild(item);
+                });
+            }
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (ws) {
+                ws.close();
+            }
+        });
+
+        // Initial log
+        addLog('System initialized and ready');
+    </script>
+</body>
+</html>

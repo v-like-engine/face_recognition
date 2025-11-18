@@ -2,11 +2,15 @@
 Main application entry point for Face Recognition API
 """
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import uvicorn
+from pathlib import Path
 
 from app.api import router
+from app.api.streaming import router as streaming_router
 from config.settings import settings
 
 # Create FastAPI application
@@ -46,8 +50,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Setup templates
+templates = Jinja2Templates(directory="templates")
+
+# Mount static files if directory exists
+static_dir = Path("static")
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Include API routes
 app.include_router(router, prefix=settings.api_prefix, tags=["Face Recognition"])
+app.include_router(streaming_router, prefix=settings.api_prefix, tags=["Video Streaming"])
 
 
 @app.exception_handler(Exception)
@@ -71,8 +84,15 @@ async def root():
         "version": settings.app_version,
         "docs": "/docs",
         "redoc": "/redoc",
+        "testing_stand": "/testing-stand",
         "health": f"{settings.api_prefix}/health"
     }
+
+
+@app.get("/testing-stand", response_class=HTMLResponse)
+async def testing_stand(request: Request):
+    """Face recognition testing stand web interface"""
+    return templates.TemplateResponse("testing_stand.html", {"request": request})
 
 
 if __name__ == "__main__":
